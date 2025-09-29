@@ -1,6 +1,6 @@
 PUSH
 git add .
-git commit -m "Updated with latest changes"
+git commit -m "all logins are ok"
 git push -u origin main
 
 
