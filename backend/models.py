@@ -17,19 +17,19 @@ class Student(db.Model):
 class Teacher(db.Model):
     __tablename__ = "teacher"
     teacher_id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
-    email = db.Column(db.String(100), unique=True, nullable=False)
-    department = db.Column(db.String(50))
-    password = db.Column(db.Text, nullable=False)
-    status = db.Column(db.Boolean, default=False)
+    teacher_name = db.Column(db.String(100))
+    teacher_email = db.Column(db.String(100), unique=True, nullable=False)
+    teacher_department = db.Column(db.String(100))
+    teacher_password = db.Column(db.String(100), nullable=False)
+    teacher_status = db.Column(db.String(20))
 
 class Admin(db.Model):
     __tablename__ = "admin"
     admin_id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100))
-    email = db.Column(db.String(100), unique=True, nullable=False)
-    phone = db.Column(db.String(15))
-    password = db.Column(db.Text, nullable=False)
+    admin_name = db.Column(db.String(100))
+    admin_department = db.Column(db.String(100))
+    admin_email = db.Column(db.String(100), unique=True, nullable=False)
+    admin_password = db.Column(db.String(100), nullable=False)
 
 class Attendance(db.Model):
     __tablename__ = "attendance"
@@ -69,3 +69,46 @@ class Fine(db.Model):
             self.late_by = 0
             self.amount = 0
             self.sms_sent = True  # No fine, SMS not required
+
+
+
+
+class Payment(db.Model):
+    __tablename__ = "payments"
+
+    payment_id = db.Column(db.Integer, primary_key=True)
+    student_id = db.Column(db.Integer, db.ForeignKey("students.student_id", ondelete="CASCADE"), nullable=False)
+    order_id = db.Column(db.String(100), unique=True, nullable=False)   # Razorpay Order ID
+    payment_ref_id = db.Column(db.String(100), unique=True, nullable=True)  # Razorpay Payment ID
+    amount = db.Column(db.Numeric(10, 2), nullable=False)
+    currency = db.Column(db.String(10), default="INR")
+
+    status = db.Column(db.String(20), default="created")  
+    # possible values: created, pending, paid, failed, refunded
+
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Relationships
+    student = db.relationship("Student", backref=db.backref("payments", lazy=True))
+
+    def __repr__(self):
+        return f"<Payment {self.payment_id} - {self.status}>"
+
+
+class SMSLog(db.Model):
+    __tablename__ = "sms_logs"
+
+    sms_id = db.Column(db.Integer, primary_key=True)
+    student_id = db.Column(db.Integer, db.ForeignKey("students.student_id", ondelete="CASCADE"), nullable=False)
+    message = db.Column(db.Text, nullable=False)
+    status = db.Column(db.String(20), default="pending")  
+    # possible values: pending, sent, failed
+
+    sent_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # Relationships
+    student = db.relationship("Student", backref=db.backref("sms_logs", lazy=True))
+
+    def __repr__(self):
+        return f"<SMSLog {self.sms_id} - {self.status}>"

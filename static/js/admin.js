@@ -68,6 +68,36 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Show modal for adding teacher
+    document.getElementById("addDummyTeacher").addEventListener("click", function() {
+        var modal = new bootstrap.Modal(document.getElementById('addTeacherModal'));
+        modal.show();
+    });
+
+    // Handle add teacher form submission
+    document.getElementById("addTeacherForm").addEventListener("submit", function(e) {
+        e.preventDefault();
+        fetch("/admin/add_teacher", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                teacher_name: document.getElementById("teacherName").value,
+                teacher_email: document.getElementById("teacherEmail").value,
+                teacher_department: document.getElementById("teacherDepartment").value,
+                teacher_password: document.getElementById("teacherPassword").value,
+                teacher_status: "Active"
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert(data.message || "Failed to add teacher.");
+            }
+        });
+    });
+
     // Function to add a new teacher row
     function addTeacherToTable(teacher) {
         const tableBody = document.getElementById('teachersTable').querySelector('tbody');
@@ -78,7 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <td>${teacher.email}</td>
             <td>${teacher.department}</td>
             <td><span class="badge bg-success">${teacher.status}</span></td>
-            <td><button class="btn btn-danger btn-sm delete-teacher-btn"><i class="bi bi-trash3"></i></button></td>
+            <td><button class="btn btn-danger btn-sm delete-teacher-btn" data-id="${teacher.id}"><i class="bi bi-trash3"></i></button></td>
         `;
         tableBody.appendChild(newRow);
     }
@@ -103,4 +133,48 @@ document.addEventListener('DOMContentLoaded', () => {
         const bsToast = new bootstrap.Toast(toast);
         bsToast.show();
     }
+
+    document.querySelectorAll('.delete-teacher-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            if (confirm("Are you sure you want to delete this teacher?")) {
+                fetch(`/admin/delete_teacher/${btn.dataset.id}`, {
+                    method: "POST",
+                    headers: { "X-Requested-With": "XMLHttpRequest" }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        // Remove the row from the table
+                        btn.closest('tr').remove();
+                    } else {
+                        alert(data.message || "Failed to delete teacher.");
+                    }
+                });
+            }
+        });
+    });
+
+    document.getElementById("viewMoreAttendanceBtn").addEventListener("click", function() {
+        const tbody = document.getElementById("attendanceTableBody");
+        tbody.innerHTML = `{% for record in attendance_records %}
+        <tr>
+            <td>{{ record.date.strftime('%Y-%m-%d') }}</td>
+            <td>{{ record.student_id }}</td>
+            <td>{{ record.student_name }}</td>
+            <td>{{ record.department }}</td>
+            <td>
+                {% if record.status == 'Late' %}
+                    <span class="badge bg-warning text-dark">Late</span>
+                {% elif record.status == 'Present' %}
+                    <span class="badge bg-success">Present</span>
+                {% else %}
+                    <span class="badge bg-danger">{{ record.status }}</span>
+                {% endif %}
+            </td>
+            <td>{{ record.time.strftime('%H:%M') if record.time else '-' }}</td>
+            <td>{{ record.late_by if record.late_by else '0' }}</td>
+        </tr>
+        {% endfor %}`;
+        this.style.display = "none";
+    });
 });

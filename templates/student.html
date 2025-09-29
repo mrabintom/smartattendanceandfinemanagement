@@ -38,8 +38,17 @@
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end shadow-sm">
                     <li class="dropdown-header">
-                        <div class="fw-semibold">{{ session['student_name'] }}</div>
-                        <small class="text-muted">Department: {{ session['department'] }}</small>
+                        <div class="fw-semibold">{{ session.get('name', 'Student') }}</div>
+                        <small class="text-muted">ID: {{ session.get('student_id', 'N/A') }}</small>
+                    </li>
+                    <li class="dropdown-header">
+                        <small class="text-muted">Department: {{ session.get('department', 'N/A') }}</small>
+                    </li>
+                    <li class="dropdown-header">
+                        <small class="text-muted">Email: {{ session.get('email', 'N/A') }}</small>
+                    </li>
+                    <li class="dropdown-header">
+                        <small class="text-muted">Mobile: {{ session.get('mobile', 'N/A') }}</small>
                     </li>
                     <li><hr class="dropdown-divider" /></li>
                     <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}">
@@ -90,22 +99,71 @@
                             <div class="card metric-card gradient-yellow">
                                 <div class="card-body">
                                     <h6 class="text-dark-50 small mb-2">Late Arrivals</h6>
-                                    <div class="display-6 fw-semibold">2</div>
+                                    <div class="display-6 fw-semibold">{{ late_entries_count }}</div>
                                     <div class="text-muted small">This Month</div>
                                 </div>
                             </div>
                         </div>
                         <div class="col-sm-6 col-xl-4">
-                            <a href="razorpay.html" style="text-decoration: none;">
-                                <div class="card metric-card gradient-coral">
-                                    <div class="card-body">
-                                        <h6 class="text-white-50 small mb-2">Total Fine</h6>
-                                        <div class="display-6 fw-semibold text-white">₹200</div>
-                                        <div><span class="badge bg-warning text-dark">Unpaid</span></div>
-                                    </div>
-                                </div>
-                            </a>
-                        </div>
+    {% set late_threshold_hour = 8 %}
+    {% set late_threshold_minute = 50 %}
+    {% set fine_per_late = 20 %}
+    {% set total_unpaid_fine = 0 %}
+    {% set total_paid_fine = 0 %}
+    {% set late_entries_count = 0 %}
+    
+    <!-- Calculate total fines from attendance records -->
+    {% for record in attendance_records %}
+        {% if record.time and record.date.weekday() not in [5, 6] %}
+            {% if record.time.hour > late_threshold_hour or (record.time.hour == late_threshold_hour and record.time.minute > late_threshold_minute) %}
+                {% set late_entries_count = late_entries_count + 1 %}
+                {% set fine_amount = fine_per_late %}
+                {% set is_paid = record.fine_status if record.fine_status else 'unpaid' %}
+                {% if is_paid == 'unpaid' %}
+                    {% set total_unpaid_fine = total_unpaid_fine + fine_amount %}
+                {% else %}
+                    {% set total_paid_fine = total_paid_fine + fine_amount %}
+                {% endif %}
+            {% endif %}
+        {% endif %}
+    {% endfor %}
+    
+    {% set total_fine = total_unpaid_fine + total_paid_fine %}
+    
+    {% if total_fine > 0 %}
+        {% if total_unpaid_fine > 0 %}
+            <a href="#fine" style="text-decoration: none;" onclick="scrollToFineSection(event)">
+                <div class="card metric-card gradient-coral">
+                    <div class="card-body">
+                        <h6 class="text-white-50 small mb-2">Total Fine</h6>
+                        <div class="display-6 fw-semibold text-white">₹{{ total_fine }}</div>
+                        <div><span class="badge bg-warning text-dark">₹{{ total_unpaid_fine }} Unpaid</span></div>
+                    </div>
+                </div>
+            </a>
+        {% else %}
+            <a href="#fine" style="text-decoration: none;" onclick="scrollToFineSection(event)">
+                <div class="card metric-card gradient-green">
+                    <div class="card-body">
+                        <h6 class="text-white-50 small mb-2">Total Fine</h6>
+                        <div class="display-6 fw-semibold text-white">₹{{ total_fine }}</div>
+                        <div><span class="badge bg-success">All Paid</span></div>
+                    </div>
+                </div>
+            </a>
+        {% endif %}
+    {% else %}
+        <a href="#fine" style="text-decoration: none;" onclick="scrollToFineSection(event)">
+            <div class="card metric-card gradient-blue">
+                <div class="card-body">
+                    <h6 class="text-white-50 small mb-2">Total Fine</h6>
+                    <div class="display-6 fw-semibold text-white">₹0</div>
+                    <div><span class="badge bg-success">No Fines</span></div>
+                </div>
+            </div>
+        </a>
+    {% endif %}
+</div>
                     </div>
                 </section>
                 <!-- Charts -->
@@ -113,7 +171,7 @@
                     <div class="col-lg-6">
                         <div class="card chart-card shadow-sm h-100">
                             <div class="card-body d-flex flex-column">
-                                <h5 class="card-title mb-3">Attendance Trend</h5>
+                                <h5 class="card-title mb-3">Attendance Status</h5>
                                 <div class="chart-container flex-grow-1">
                                     <canvas id="attendanceChart"></canvas>
                                 </div>
@@ -121,23 +179,54 @@
                         </div>
                     </div>
                     <div class="col-lg-6">
-                        <div class="card chart-card shadow-sm h-100">
-                            <div class="card-body d-flex flex-column">
-                                <h5 class="card-title mb-3"> Status</h5>
-                                <div class="chart-container flex-grow-1 d-flex align-items-center justify-content-center">
-                                    <canvas id="fineChart"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+    <div class="card chart-card shadow-sm h-100">
+    <div class="card-body d-flex flex-column">
+        <h5 class="card-title mb-3">Status</h5>
+        <div class="chart-container flex-grow-1 d-flex align-items-center justify-content-center">
+            <canvas id="fineChart"></canvas>
+        </div>
+    </div>
+</div>
+</div>
+
+<!-- Add Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Attendance data passed from Flask
+    const presentCount = {{ present_count }};
+    const absentCount = {{ absent_count }};
+
+    const ctx = document.getElementById('fineChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Present', 'Absent'],
+            datasets: [{
+                data: [presentCount, absentCount],
+                backgroundColor: ['#28a745', '#dc3545'], // green, red
+                borderColor: ['#fff', '#fff'],
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+</script>
+
                 </section>
    <!-- Attendance Details -->
-<section id="attendance" class="panel-section">
-    <div class="card shadow-sm">
-        <div class="card-body">
-            <h5 class="card-title">Attendance Details</h5>
-            <div class="table-responsive">
-                <table class="table align-middle" id="attendanceTable">
+        <section id="attendance" class="panel-section">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Attendance Details</h5>
+                    <div class="table-responsive">
+                        <table class="table align-middle" id="attendanceTable">
                     <thead>
                         <tr>
                             <th>Date</th>
@@ -199,43 +288,181 @@
 </script>
                 <!-- Fine Details -->
                 <section id="fine" class="panel-section">
-                    <div class="card shadow-sm">
-                        <div class="card-body">
-                            <h5 class="card-title">Fine Details & Status</h5>
-                            <div class="table-responsive">
-                                <table class="table align-middle">
-                                    <thead>
-                                        <tr>
-                                            <th>Date</th>
-                                            <th>Late By (mins)</th>
-                                            <th>Fine Amount</th>
-                                            <th>Status</th>
-                                            <th>Parent Notified</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>2025-08-20</td>
-                                            <td>12</td>
-                                            <td>₹50</td>
-                                            <td><span class="badge bg-warning text-dark">Unpaid</span></td>
-                                            <td>Yes</td>
-                                        </tr>
-                                        <tr>
-                                            <td>2025-08-10</td>
-                                            <td>15</td>
-                                            <td>₹50</td>
-                                            <td><span class="badge bg-success">Paid</span></td>
-                                            <td>Yes</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                            <button class="btn btn-outline-primary">Pay All Pending Fines</button>
-                        </div>
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h5 class="card-title">Fine Details & Status</h5>
+            <div class="table-responsive">
+                <table class="table align-middle" id="fineTable">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Late By (mins)</th>
+                            <th>Fine Amount</th>
+                            <th>Status</th>
+                            <th>Parent Notified</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% set late_threshold = '08:50' %}
+                        {% set fine_per_late = 20 %}
+                        {% set total_unpaid_fine = 0 %}
+                        
+                        {% for record in attendance_records %}
+                            {% if record.time and record.date.weekday() not in [5, 6] %}
+                                {% set entry_time = record.time.strftime('%H:%M') %}
+                                {% if record.time.hour > 8 or (record.time.hour == 8 and record.time.minute > 50) %}
+                                    {% set late_minutes = ((record.time.hour - 8) * 60 + record.time.minute - 50) %}
+                                    {% set fine_amount = fine_per_late %}
+                                    {% set is_paid = record.fine_status if record.fine_status else 'unpaid' %}
+                                    {% if is_paid == 'unpaid' %}
+                                        {% set total_unpaid_fine = total_unpaid_fine + fine_amount %}
+                                    {% endif %}
+                                    
+                                    <tr class="fine-row{% if loop.index > 5 %} d-none{% endif %}">
+                                        <td>{{ record.date.strftime('%Y-%m-%d') }}</td>
+                                        <td>
+                                            <span class="badge bg-warning text-dark">{{ late_minutes }} mins</span>
+                                        </td>
+                                        <td>₹{{ fine_amount }}</td>
+                                        <td>
+                                            {% if is_paid == 'paid' %}
+                                                <span class="badge bg-success">Paid</span>
+                                            {% else %}
+                                                <span class="badge bg-danger">Unpaid</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if record.parent_notified %}
+                                                <i class="bi bi-check-circle-fill text-success"></i> Yes
+                                            {% else %}
+                                                <i class="bi bi-x-circle-fill text-danger"></i> No
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if is_paid == 'unpaid' %}
+                                                <a class="btn btn-sm btn-outline-primary"
+                                                   href="{{ url_for('payment.pay', student_id=session['user_id'], amount=fine_amount) }}">
+                                                    Pay ₹{{ fine_amount }}
+                                                </a>
+                                            {% else %}
+                                                <span class="text-success"><i class="bi bi-check-circle"></i> Paid</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            {% endif %}
+                        {% else %}
+                            <tr>
+                                <td colspan="6" class="text-center text-muted">No late arrivals or fines found.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            {% if total_unpaid_fine > 0 %}
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <div>
+                        <strong>Total Unpaid Fines: ₹{{ total_unpaid_fine }}</strong>
                     </div>
-                </section>
+                    <a class="btn btn-primary"
+                       href="{{ url_for('payment.pay', student_id=session['user_id'], amount=total_unpaid_fine) }}">
+                        Pay All Pending Fines (₹{{ total_unpaid_fine }})
+                    </a>
+                </div>
+            {% endif %}
+            
+            {% if attendance_records|selectattr('time')|list|length > 5 %}
+                <button class="btn btn-outline-secondary mt-2" id="showAllFinesBtn">Show All Fine Records</button>
+            {% endif %}
+        </div>
+    </div>
+</section>
 
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // Show all fines button
+    const showAllBtn = document.getElementById("showAllFinesBtn");
+    if (showAllBtn) {
+        showAllBtn.addEventListener("click", function() {
+            document.querySelectorAll("#fineTable .fine-row.d-none").forEach(function(row) {
+                row.classList.remove("d-none");
+            });
+            showAllBtn.style.display = "none";
+        });
+    }
+    
+    // Individual fine payment
+    document.querySelectorAll(".pay-fine-btn").forEach(function(btn) {
+        btn.addEventListener("click", function() {
+            const date = this.dataset.date;
+            const amount = this.dataset.amount;
+            
+            if (confirm(`Pay fine of ₹${amount} for ${date}?`)) {
+                // Here you would typically make an AJAX call to your backend
+                fetch('/pay-fine', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('meta[name=csrf-token]').getAttribute('content')
+                    },
+                    body: JSON.stringify({
+                        date: date,
+                        amount: amount
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload(); // Refresh to show updated status
+                    } else {
+                        alert('Payment failed. Please try again.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Payment failed. Please try again.');
+                });
+            }
+        });
+    });
+    
+    // Pay all fines
+    const payAllBtn = document.getElementById("payAllFinesBtn");
+    if (payAllBtn) {
+        payAllBtn.addEventListener("click", function() {
+            const total = this.dataset.total;
+            
+            if (confirm(`Pay all pending fines totaling ₹${total}?`)) {
+                // Here you would typically make an AJAX call to your backend
+                fetch('/pay-all-fines', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('meta[name=csrf-token]').getAttribute('content')
+                    },
+                    body: JSON.stringify({
+                        total_amount: total
+                    })
+                })
+                .then(response => response.json())
+                .then data => {
+                    if (data.success) {
+                        location.reload(); // Refresh to show updated status
+                    } else {
+                        alert('Payment failed. Please try again.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Payment failed. Please try again.');
+                });
+            }
+        });
+    }
+});
+</script>
                 
                 <footer class="footer py-3">
                     <div class="text-center text-muted small">

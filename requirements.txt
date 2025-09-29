@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 opencv-python
 face_recognition
 dlib
@@ -7,7 +6,6 @@ flask_sqlalchemy
 psycopg2-binary
 numpy
 pillow
-=======
 flask
 flask_sqlalchemy
 psycopg2-binary
@@ -16,4 +14,5 @@ opencv-python
 face-recognition
 dlib
 pandas
->>>>>>> 26a883ce6dfca0e234752929d138619e35c8e59f
+razorpay
+twilio

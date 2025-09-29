@@ -13,3 +13,4 @@ psql -U postgres -d minipro
 
 
 
+.\venv\Scripts\activate

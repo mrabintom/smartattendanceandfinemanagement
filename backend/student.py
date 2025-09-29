@@ -91,3 +91,65 @@ def logout():
     session.clear()
     flash("Logged out successfully", "info")
     return redirect(url_for("auth.index"))
+
+
+
+
+
+@student_bp.route("/dashboard")
+def student_dashboard():
+    if "user_id" not in session or session.get("role") != "student":
+        return redirect(url_for("auth.index") + "#login")
+
+    student_id = session["user_id"]
+    attendance_records = Attendance.query.filter_by(student_id=student_id).order_by(Attendance.date.desc()).all()
+
+    # Late threshold
+    late_hour = 8
+    late_minute = 50
+
+    late_entries = []
+    total_unpaid_fine = 0
+    total_paid_fine = 0
+
+    for record in attendance_records:
+        # Exclude weekends
+        if record.date.weekday() in [5, 6]:
+            continue
+        if record.time:
+            if (record.time.hour > late_hour) or (record.time.hour == late_hour and record.time.minute > late_minute):
+                late_entries.append(record)
+                fine_status = getattr(record, 'fine_status', 'unpaid')
+                if fine_status == 'paid':
+                    total_paid_fine += 20
+                else:
+                    total_unpaid_fine += 20
+
+    late_entries_count = len(late_entries)
+    total_fine = total_unpaid_fine + total_paid_fine
+
+    # Attendance percentage (optional)
+    working_days = [r for r in attendance_records if r.date.weekday() not in (5, 6)]
+    total_days = len(working_days)
+    present_days = sum(1 for r in working_days if r.time)
+    attendance_percentage = round((present_days / total_days) * 100, 2) if total_days > 0 else 0
+
+    # Calculate total unpaid fine
+    total_unpaid_fine = 0
+    for record in attendance_records:
+        if record.time and record.date.weekday() not in [5, 6]:
+            if (record.time.hour > 8) or (record.time.hour == 8 and record.time.minute > 50):
+                fine_status = getattr(record, 'fine_status', 'unpaid')
+                if fine_status == 'unpaid':
+                    total_unpaid_fine += 20
+
+    return render_template(
+        "student.html",
+        attendance_records=attendance_records,
+        late_entries_count=late_entries_count,
+        total_unpaid_fine=total_unpaid_fine,
+        total_paid_fine=total_paid_fine,
+        total_fine=total_fine,
+        attendance_percentage=attendance_percentage,
+        name=session.get("name")
+    )

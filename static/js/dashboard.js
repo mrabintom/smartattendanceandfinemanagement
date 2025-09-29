@@ -56,10 +56,10 @@ if (fineChartElem) {
     new Chart(fineCtx, {
         type: 'doughnut',
         data: {
-            labels: ['Present', 'Absent', 'Late'],
+            labels: ['Present', 'Absent'],
             datasets: [{
-                data: [485, 5, 10],
-                backgroundColor: ['#22c55e', '#ef4444', '#f9a825']
+                data: [10, 0 ],
+                backgroundColor: ['#22c55e', '#ef4444']
             }]
         },
         options: {

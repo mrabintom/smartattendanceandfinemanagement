@@ -21,7 +21,6 @@
                     <i class="bi bi-list fs-2"></i>
                 </button>
                 <a href="#" class="logo d-flex align-items-center text-decoration-none">
-                    <img src="{{ url_for('static', filename='img/logo.png') }}" alt="logo" class="me-2" />
                     <span class="logo-text">Smart Attendance – Teacher</span>
                 </a>
             </div>
@@ -37,8 +36,7 @@
                         <small class="text-muted">Faculty ID: {{ session['user_id'] }}</small>
                     </li>
                     <li><hr class="dropdown-divider" /></li>
-                    <li><a class="dropdown-item" href="#"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
-                </ul>
+<li><a class="dropdown-item" href="{{ url_for('auth.logout') }}"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
             </div>
         </div>
     </header>
@@ -50,6 +48,7 @@
                     <div>
                         <div class="fw-semibold">{{ session['name'] }}</div>
                         <small class="text-muted">Faculty ID: {{ session['user_id'] }}</small>
+                        <small class="text-muted">Department: {{ session['teacher_department'] }}</small>
                     </div>
                 </div>
                 <nav class="nav flex-column">
@@ -145,45 +144,7 @@
                     </div>
                 </section>
 
-                <section id="registration-approval" class="panel-section">
-                    <div class="card shadow-sm">
-                        <div class="card-body">
-                            <h5 class="card-title">Student Registration Approval</h5>
-                            <div class="table-responsive">
-                                <table class="table align-middle">
-                                    <thead>
-                                        <tr>
-                                            <th>Roll No.</th>
-                                            <th>Name</th>
-                                            <th>Email</th>
-                                            <th>Parent Email</th>
-                                            <th>Approve</th>
-                                            <th>Reject</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>1004</td>
-                                            <td>Simran Kaur</td>
-                                            <td>simran@email.com</td>
-                                            <td>parent1@email.com</td>
-                                            <td><button class="btn btn-sm btn-success">Approve</button></td>
-                                            <td><button class="btn btn-sm btn-danger">Reject</button></td>
-                                        </tr>
-                                        <tr>
-                                            <td>1005</td>
-                                            <td>Vikas Patel</td>
-                                            <td>vikas@email.com</td>
-                                            <td>parent2@email.com</td>
-                                            <td><button class="btn btn-sm btn-success">Approve</button></td>
-                                            <td><button class="btn btn-sm btn-danger">Reject</button></td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </section>
+              
 
                 <section id="attendance" class="panel-section">
                     <div class="card shadow-sm">

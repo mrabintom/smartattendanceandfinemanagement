@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Payment Gateway</title>
+<style>
+    body { font-family: Arial, sans-serif; background: #f2f2f2; display: flex; justify-content: center; align-items: center; height: 100vh; }
+    .payment-card { background: #fff; padding: 30px; border-radius: 10px; box-shadow: 0 0 15px rgba(0,0,0,0.2); text-align: center; width: 350px; }
+    h2 { color: #333; }
+    button { background: #635bff; color: #fff; border: none; padding: 12px 20px; border-radius: 5px; font-size: 16px; cursor: pointer; }
+    button:hover { background: #4a42d1; }
+</style>
+</head>
+<body>
+
+<div class="payment-card">
+    <h2>Hello, {{ student.name }}</h2>
+    <p>Amount to Pay: ₹{{ amount / 100 }}</p>
+    <button id="rzp-button">Pay Now</button>
+</div>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+    var options = {
+        "key": "{{ razorpay_key_id }}", // Pass this from Flask config
+        "amount": "{{ amount }}", // Amount in paise
+        "currency": "INR",
+        "name": "Your Organization",
+        "description": "Payment for Fines",
+        "order_id": "{{ order['id'] }}", 
+        "handler": function (response){
+            // Send payment response to server
+            fetch("/payment/success", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    razorpay_payment_id: response.razorpay_payment_id,
+                    razorpay_order_id: response.razorpay_order_id,
+                    razorpay_signature: response.razorpay_signature
+                })
+            }).then(res => res.json())
+              .then(data => {
+                  if(data.status === "success") {
+                      alert("Payment Successful!");
+                      window.location.href = "/thank-you";
+                  } else {
+                      alert("Payment Failed!");
+                  }
+              });
+        },
+        "theme": { "color": "#635bff" }
+    };
+
+    document.getElementById('rzp-button').onclick = function(e){
+        var rzp1 = new Razorpay(options);
+        rzp1.open();
+        e.preventDefault();
+    }
+</script>
+</body>
+</html>

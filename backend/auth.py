@@ -21,6 +21,9 @@ def login():
             session["role"] = "student"
             session["name"] = user.name
             session["department"] = user.department
+            session["email"] = user.email
+            session["mobile"] = getattr(user, 'mobile', 'N/A')
+            session["photo"] = getattr(user, 'photo', 'default-avatar.png')
             flash("Student login successful!", "success")
             return redirect(url_for("student_dashboard"))
         flash("Invalid student credentials!", "danger")
@@ -32,7 +35,8 @@ def login():
             session["user_id"] = user.teacher_id
             session["role"] = "teacher"
             session["name"] = user.teacher_name
-            session["department"] = user.teacher_department
+            session["email"] = user.teacher_email
+            session['teacher_department'] = user.teacher_department
             flash("Teacher login successful!", "success")
             return redirect(url_for("teacher_dashboard"))
         flash("Invalid teacher credentials!", "danger")
@@ -45,14 +49,12 @@ def login():
             session["role"] = "admin"
             session["name"] = user.admin_name
             session["department"] = user.admin_department
+            session["email"] = user.admin_email
             flash("Admin login successful!", "success")
-            return redirect(url_for("admin_dashboard"))
-        flash("Invalid admin credentials!", "danger")
-
-    else:
-        flash("Please select a valid role.", "danger")
-
-    return redirect(url_for("auth.index") + "#login")
+            return redirect(url_for("admin.dashboard"))
+        else:
+            flash("Invalid admin credentials!", "danger")
+            return redirect(url_for("auth.index") + "#login")
 
 @auth_bp.route("/logout")
 def logout():
