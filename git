@@ -1,6 +1,6 @@
 PUSH
 git add .
-git commit -m "all logins are ok"
+git commit -m "all FINAL are ok"
 git push -u origin main
 
 

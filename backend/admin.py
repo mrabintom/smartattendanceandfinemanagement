@@ -1,4 +1,6 @@
-from flask import Blueprint, render_template, session, redirect, url_for, flash, request, jsonify
+from flask import Blueprint, render_template, session, redirect, url_for, flash, request, jsonify, send_file
+import pandas as pd
+from io import BytesIO
 from backend.models import db, Student, Teacher, Admin, Attendance
 
 admin_bp = Blueprint("admin", __name__)
@@ -71,3 +73,72 @@ def delete_teacher(teacher_id):
         db.session.commit()
         return jsonify({"success": True})
     return jsonify({"success": False, "message": "Teacher not found"}), 404
+
+@admin_bp.route("/export_students_excel")
+@admin_required
+def export_students_excel():
+    students = Student.query.all()
+    data = [{
+        "Student ID": s.student_id,
+        "Name": s.name,
+        "Department": s.department,
+        "Email": s.email,
+        "Mobile": s.mobile,
+        "Parent Mobile": s.parent_mobile,
+    } for s in students]
+    df = pd.DataFrame(data)
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+        df.to_excel(writer, index=False, sheet_name='Students')
+    output.seek(0)
+    return send_file(output, download_name="students.xlsx", as_attachment=True, mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+
+@admin_bp.route("/export_attendance_excel")
+@admin_required
+def export_attendance_excel():
+    records = Attendance.query.all()
+    data = []
+    for r in records:
+        student = Student.query.get(r.student_id)
+        data.append({
+            "Attendance ID": r.attendance_id,
+            "Student ID": r.student_id,
+            "Student Name": r.student_name,
+            "Department": student.department if student else "",
+            "Date": r.date.strftime('%Y-%m-%d') if r.date else "",
+            "Arrival Time": r.time.strftime('%H:%M') if r.time else "",
+        })
+    df = pd.DataFrame(data)
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+        df.to_excel(writer, index=False, sheet_name='Attendance')
+    output.seek(0)
+    return send_file(output, download_name="attendance.xlsx", as_attachment=True, mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+
+@admin_bp.route("/export_teachers_excel")
+@admin_required
+def export_teachers_excel():
+    teachers = Teacher.query.order_by(Teacher.teacher_id).all()
+    data = [{
+        "Teacher ID": t.teacher_id,
+        "Name": t.teacher_name,
+        "Email": t.teacher_email,
+        "Department": t.teacher_department,
+        "Status": t.teacher_status
+    } for t in teachers]
+
+    df = pd.DataFrame(data)
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine="xlsxwriter") as writer:
+        df.to_excel(writer, index=False, sheet_name="Teachers")
+    output.seek(0)
+    return send_file(
+        output,
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        download_name="teachers.xlsx",
+        as_attachment=True
+    )
+
+
+
+

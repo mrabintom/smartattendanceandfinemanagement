@@ -4,7 +4,8 @@
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <title>Smart Attendance – Admin Dashboard</title>
-    <!-- Use url_for for static assets -->
+
+    <!-- Favicon and Styles -->
     <link href="{{ url_for('static', filename='img/favicon.png') }}" rel="icon" />
     <link href="{{ url_for('static', filename='img/apple-touch-icon.png') }}" rel="apple-touch-icon" />
     <link href="https://fonts.gstatic.com" rel="preconnect" />
@@ -13,7 +14,9 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
     <link href="{{ url_for('static', filename='css/admin.css') }}" rel="stylesheet" />
 </head>
+
 <body>
+    <!-- Header -->
     <header id="header" class="header fixed-top d-flex align-items-center">
         <div class="container-fluid d-flex align-items-center justify-content-between">
             <div class="d-flex align-items-center gap-2">
@@ -21,14 +24,11 @@
                     <i class="bi bi-list fs-2"></i>
                 </button>
                 <a href="#" class="logo d-flex align-items-center text-decoration-none">
-                    
                     <span class="logo-text">Smart Attendance Admin</span>
                 </a>
             </div>
+
             <div class="d-flex align-items-center gap-3">
-                <div class="d-none d-md-block">
-                   
-                </div>
                 <div class="dropdown">
                     <a class="d-flex align-items-center text-decoration-none" href="#" data-bs-toggle="dropdown">
                         <img src="https://randomuser.me/api/portraits/men/32.jpg" class="rounded-circle me-2" width="36" height="36" alt="profile" />
@@ -49,10 +49,11 @@
             </div>
         </div>
     </header>
+
+    <!-- Sidebar and Main Panel -->
     <div class="app-wrapper">
         <aside id="sidebar" class="sidebar">
             <div class="sidebar-inner">
-                <!-- Sidebar profile -->
                 <div class="nav-profile">
                     <img src="https://randomuser.me/api/portraits/men/32.jpg" class="avatar" alt="Profile" />
                     <div>
@@ -65,79 +66,23 @@
                     <a class="nav-link active" href="#dashboard"><i class="bi bi-house-door me-2"></i>Dashboard</a>
                     <a class="nav-link" href="#teachers"><i class="bi bi-people me-2"></i>Manage Teachers</a>
                     <a class="nav-link" href="#attendance"><i class="bi bi-calendar-check me-2"></i>Attendance Tracking</a>
-                    <a class="nav-link" href="#fine"><i class="bi bi-cash-coin me-2"></i>Fine Management</a>
-                    <a class="nav-link" href="#alerts"><i class="bi bi-bell me-2"></i>Message Alerts</a>
                     <a class="nav-link" href="#export"><i class="bi bi-file-earmark-arrow-down me-2"></i>Export Data</a>
                 </nav>
             </div>
         </aside>
+
         <main class="main-panel">
             <div class="container-fluid content-wrapper">
-                <section id="dashboard" class="mb-4">
-                    <div class="row g-3">
-                        <div class="col-sm-6 col-xl-3">
-                            <div class="card metric-card gradient-purple">
-                                <div class="card-body">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <h6 class="text-uppercase small mb-2 text-white-50">Total Teachers</h6>
-                                        <i class="bi bi-people fs-4 text-white-75"></i>
-                                    </div>
-                                    <div class="display-6 fw-semibold text-white" id="total-teachers">{{ total_teachers }}</div>
-                                    <div class="text-white-50 small">Active</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-6 col-xl-3">
-                            <div class="card metric-card gradient-yellow">
-                                <div class="card-body">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <h6 class="text-uppercase small mb-2 text-dark-50">Total Attendances (%)</h6>
-                                        <i class="bi bi-bar-chart-line fs-4 text-dark-50"></i>
-                                    </div>
-                                    <div class="display-6 fw-semibold" id="attendance-percentage">
-                                        {{ attendance_percentage }}%
-                                    </div>
-                                    <div class="text-muted small">Overall Attendance</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-6 col-xl-3">
-                            <div class="card metric-card gradient-blue">
-                                <div class="card-body">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <h6 class="text-uppercase small mb-2 text-white-50">Total Students</h6>
-                                        <i class="bi bi-person-lines-fill fs-4 text-white-75"></i>
-                                    </div>
-                                    <div class="display-6 fw-semibold text-white" id="total-students">0</div>
-                                    <div class="text-white-50 small">Enrolled</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-6 col-xl-3">
-                            <div class="card metric-card gradient-coral">
-                                <div class="card-body">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <h6 class="text-uppercase small mb-2 text-white-50">Total Fines</h6>
-                                        <i class="bi bi-currency-rupee fs-4 text-white-75"></i>
-                                    </div>
-                                    <div class="display-6 fw-semibold text-white" id="total-fines">₹0</div>
-                                    <div class="text-white-50 small">This Month</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-               
-
+                
+                <!-- Teacher Management -->
                 <section id="teachers" class="panel-section">
                     <div class="card shadow-sm">
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <h5 class="card-title mb-0">All Teachers</h5>
-                                <div class="small">
-                                    <button class="btn btn-outline-secondary btn-sm" id="addDummyTeacher"><i class="bi bi-person-plus me-1"></i>Add</button>
-                                </div>
+                                <button class="btn btn-outline-secondary btn-sm" id="addDummyTeacher">
+                                    <i class="bi bi-person-plus me-1"></i>Add
+                                </button>
                             </div>
                             <div class="table-responsive">
                                 <table class="table align-middle" id="teachersTable">
@@ -166,7 +111,9 @@
                                                 {% endif %}
                                             </td>
                                             <td>
-                                                <button class="btn btn-danger btn-sm delete-teacher-btn" data-id="{{ teacher.teacher_id }}"><i class="bi bi-trash3"></i></button>
+                                                <button class="btn btn-danger btn-sm delete-teacher-btn" data-id="{{ teacher.teacher_id }}">
+                                                    <i class="bi bi-trash3"></i>
+                                                </button>
                                             </td>
                                         </tr>
                                         {% endfor %}
@@ -177,6 +124,7 @@
                     </div>
                 </section>
 
+                <!-- Attendance Tracking -->
                 <section id="attendance" class="panel-section">
                     <div class="card shadow-sm">
                         <div class="card-body">
@@ -199,7 +147,7 @@
                                             <td>{{ record.student_id }}</td>
                                             <td>{{ record.student_name }}</td>
                                             <td>{{ record.time.strftime('%H:%M') if record.time else '-' }}</td>
-                                            <td>{{ record.late_by if record.late_by else '0' }}</td>
+                                            <td class="late-by" data-arrival="{{ record.time.strftime('%H:%M') if record.time else '' }}"></td>
                                         </tr>
                                         {% endfor %}
                                     </tbody>
@@ -212,85 +160,30 @@
                     </div>
                 </section>
 
-                <section id="fine" class="panel-section">
-                    <div class="card shadow-sm">
-                        <div class="card-body">
-                            <h5 class="card-title">Fine Management</h5>
-                            <div class="table-responsive">
-                                <table class="table align-middle" id="fineTable">
-                                    <thead>
-                                        <tr>
-                                            <th>Student Name</th>
-                                            <th>Department
-                                            <th>Date</th>
-
-                                            <th>Late By (mins)</th>
-                                            <th>Fine Amount</th>
-                                            <th>Status</th>
-                                            <th>Parent Notified</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for record in fine_records %}
-                                        <tr>
-                                            <td>{{ record.student_name }}</td>
-                                            <td>{{ record.department }}</td>
-                                            <td>{{ record.date }}</td>
-                                            <td>{{ record.late_by }}</td>
-                                            <td>₹{{ record.fine_amount }}</td>
-                                            <td>
-                                                {% if record.fine_status == 'Paid' %}
-                                                    <span class="badge bg-success">Paid</span>
-                                                {% else %}
-                                                    <span class="badge bg-warning text-dark">Unpaid</span>
-                                                {% endif %}
-                                            </td>
-                                            <td>{{ record.parent_notified }}</td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <section id="alerts" class="panel-section">
-                    <div class="card shadow-sm">
-                        <div class="card-body">
-                            <h5 class="card-title">Message Alerts</h5>
-                            <ul class="list-group list-group-flush" id="alertsList">
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    Parent notified for Priya Singh's late arrival on 2025-08-20
-                                    <span class="badge bg-info">Email/SMS</span>
-                                </li>
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    Fine payment received from Arjun Verma
-                                    <span class="badge bg-success">Paid</span>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </section>
-
+                <!-- Export Section -->
                 <section id="export" class="panel-section">
                     <div class="card shadow-sm">
                         <div class="card-body">
                             <h5 class="card-title">Export Data</h5>
                             <div class="d-flex flex-wrap gap-2">
-                                <button class="btn btn-purple" id="exportFineExcel"><i class="bi bi-file-earmark-excel me-2"></i>Export Fine (Excel)</button>
-                                <button class="btn btn-outline-primary" id="exportFinePDF"><i class="bi bi-filetype-pdf me-2"></i>Export Fine (PDF)</button>
-                                <button class="btn btn-purple" id="exportAttendanceExcel"><i class="bi bi-file-earmark-excel me-2"></i>Export Attendance (Excel)</button>
-                                <button class="btn btn-outline-primary" id="exportAttendancePDF"><i class="bi bi-filetype-pdf me-2"></i>Export Attendance (PDF)</button>
+                                <button class="btn btn-outline-primary" id="exportStudentExcel">
+                                    <i class="bi bi-file-earmark-excel me-2"></i>Export Student (Excel)
+                                </button>
+                                <button class="btn btn-outline-primary" id="exportAttendanceExcel">
+                                    <i class="bi bi-file-earmark-excel me-2"></i>Export Attendance (Excel)
+                                </button>
+                                <button class="btn btn-outline-primary" id="exportTeacherExcel">
+                                    <i class="bi bi-file-earmark-excel me-2"></i>Export Teacher (Excel)
+                                </button>
                             </div>
                         </div>
                     </div>
                 </section>
 
-               
+                <!-- Footer -->
                 <footer class="footer py-3">
                     <div class="text-center text-muted small">
-                        Copyright © 2025 Smart Attendance Admin.
+                        © 2025 Smart Attendance Admin.
                         <span class="ms-1">Made with <i class="bi bi-heart-fill text-danger"></i></span>
                     </div>
                 </footer>
@@ -298,90 +191,64 @@
         </main>
     </div>
 
-    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1080">
-        <div id="toastContainer" class="toast-container"></div>
-    </div>
-
-    <!-- Add Teacher Modal -->
-<div class="modal fade" id="addTeacherModal" tabindex="-1" aria-labelledby="addTeacherModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <form id="addTeacherForm">
-        <div class="modal-header">
-          <h5 class="modal-title" id="addTeacherModalLabel">Add Teacher</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <div class="mb-3">
-            <label for="teacherName" class="form-label">Name</label>
-            <input type="text" class="form-control" id="teacherName" required>
-          </div>
-          <div class="mb-3">
-            <label for="teacherEmail" class="form-label">Email</label>
-            <input type="email" class="form-control" id="teacherEmail" required>
-          </div>
-          <div class="mb-3">
-            <label for="teacherDepartment" class="form-label">Department</label>
-            <input type="text" class="form-control" id="teacherDepartment" required>
-          </div>
-          <div class="mb-3">
-            <label for="teacherPassword" class="form-label">Password</label>
-            <input type="password" class="form-control" id="teacherPassword" required>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="submit" class="btn btn-primary">Add Teacher</button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
-
-    <!-- JS scripts at the end of body -->
+    <!-- Bootstrap & JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.0/jspdf.plugin.autotable.min.js"></script>
-    <script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+
+    <!-- Attendance Late Calculation -->
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const btn = document.getElementById("showAllAttendanceBtn");
-            if (btn) {
-                btn.addEventListener("click", function() {
-                    document.querySelectorAll("#attendanceTable .attendance-row.d-none").forEach(function(row) {
-                        row.classList.remove("d-none");
-                    });
-                    btn.style.display = "none";
+    document.addEventListener("DOMContentLoaded", function() {
+        const btn = document.getElementById("showAllAttendanceBtn");
+        if (btn) {
+            btn.addEventListener("click", function() {
+                document.querySelectorAll("#attendanceTable .attendance-row.d-none").forEach(function(row) {
+                    row.classList.remove("d-none");
                 });
+                btn.style.display = "none";
+            });
+        }
+
+        // 🕒 Late calculation logic
+        const classTime = "08:50"; // Standard class start time
+        const [classHour, classMinute] = classTime.split(":").map(Number);
+        const classTotalMinutes = classHour * 60 + classMinute;
+
+        document.querySelectorAll("#attendanceTable .late-by").forEach(td => {
+            const arrival = td.getAttribute("data-arrival");
+            if (!arrival) {
+                td.textContent = "-";
+                return;
             }
+            const [hour, minute] = arrival.split(":").map(Number);
+            const arrivalTotalMinutes = hour * 60 + minute;
+            const lateBy = Math.max(0, arrivalTotalMinutes - classTotalMinutes);
+            
+            if (lateBy === 0) {
+                td.innerHTML = '<span class="text-success fw-semibold">On Time</span>';
+            } else {
+                td.innerHTML = `<span class="text-danger fw-semibold">${lateBy}</span>`;
+            }
+        });
 
-            document.getElementById("addDummyTeacher").addEventListener("click", function() {
-    var modal = new bootstrap.Modal(document.getElementById('addTeacherModal'));
-    modal.show();
-});
-
-document.getElementById("addTeacherForm").addEventListener("submit", function(e) {
-    e.preventDefault();
-    fetch("/admin/add_teacher", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            teacher_name: document.getElementById("teacherName").value,
-            teacher_email: document.getElementById("teacherEmail").value,
-            teacher_department: document.getElementById("teacherDepartment").value,
-            teacher_password: document.getElementById("teacherPassword").value
-        })
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.success) {
-            location.reload();
-        } else {
-            alert(data.message || "Failed to add teacher.");
+        // Export button handlers
+        const exportStudentBtn = document.getElementById("exportStudentExcel");
+        if (exportStudentBtn) {
+            exportStudentBtn.addEventListener("click", function() {
+                window.location.href = "/admin/export_students_excel";
+            });
+        }
+        const exportAttendanceBtn = document.getElementById("exportAttendanceExcel");
+        if (exportAttendanceBtn) {
+            exportAttendanceBtn.addEventListener("click", function() {
+                window.location.href = "/admin/export_attendance_excel";
+            });
+        }
+        const exportTeacherBtn = document.getElementById("exportTeacherExcel");
+        if (exportTeacherBtn) {
+            exportTeacherBtn.addEventListener("click", function() {
+                window.location.href = "/admin/export_teachers_excel";
+            });
         }
     });
-});
-        });
     </script>
 </body>
 </html>

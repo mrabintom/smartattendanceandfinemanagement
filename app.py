@@ -25,7 +25,10 @@ app.config["RAZORPAY_KEY_ID"] = "rzp_test_RMJy2HmgFW6w7E"
 app.config["RAZORPAY_KEY_SECRET"] = "mhFRzissA3tnS8krwmk8y1Is"
 
 
-
+# Twilio credentials
+account_sid = 'ACb54bfabfea9e23d6211a4bf51d76956a'
+auth_token = '[AuthToken]'  # Replace with your actual Auth Token
+twilio_from = '+1234567890' # Replace with your Twilio phone number
 
 
 db.init_app(app)

@@ -3,6 +3,7 @@ from backend.models import db, Student, Attendance
 import os
 from werkzeug.utils import secure_filename
 from datetime import date, datetime
+import calendar
 
 student_bp = Blueprint("student", __name__)
 
@@ -22,11 +23,14 @@ def dashboard():
 
     attendance_percentage = round((present_days / total_days) * 100, 2) if total_days > 0 else 0
 
+    months = [{"value": f"{i:02}", "name": calendar.month_name[i]} for i in range(1, 13)]
+
     return render_template(
         "student.html",
         attendance_records=attendance_records,
         attendance_percentage=attendance_percentage,
-        name=session.get("name")
+        name=session.get("name"),
+        months=months
     )
 
 # --- Student Registration ---
@@ -153,3 +157,4 @@ def student_dashboard():
         attendance_percentage=attendance_percentage,
         name=session.get("name")
     )
+

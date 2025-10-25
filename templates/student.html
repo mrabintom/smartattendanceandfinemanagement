@@ -166,67 +166,25 @@
 </div>
                     </div>
                 </section>
-                <!-- Charts -->
-                <section class="row g-3 mb-4 charts-section">
-                    <div class="col-lg-6">
-                        <div class="card chart-card shadow-sm h-100">
-                            <div class="card-body d-flex flex-column">
-                                <h5 class="card-title mb-3">Attendance Status</h5>
-                                <div class="chart-container flex-grow-1">
-                                    <canvas id="attendanceChart"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-6">
-    <div class="card chart-card shadow-sm h-100">
-    <div class="card-body d-flex flex-column">
-        <h5 class="card-title mb-3">Status</h5>
-        <div class="chart-container flex-grow-1 d-flex align-items-center justify-content-center">
-            <canvas id="fineChart"></canvas>
-        </div>
-    </div>
-</div>
-</div>
-
-<!-- Add Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-    // Attendance data passed from Flask
-    const presentCount = {{ present_count }};
-    const absentCount = {{ absent_count }};
-
-    const ctx = document.getElementById('fineChart').getContext('2d');
-    new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: ['Present', 'Absent'],
-            datasets: [{
-                data: [presentCount, absentCount],
-                backgroundColor: ['#28a745', '#dc3545'], // green, red
-                borderColor: ['#fff', '#fff'],
-                borderWidth: 2
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    position: 'bottom'
-                }
-            }
-        }
-    });
-</script>
-
-                </section>
+                <!-- Charts Section -->
    <!-- Attendance Details -->
         <section id="attendance" class="panel-section">
             <div class="card shadow-sm">
                 <div class="card-body">
-                    <h5 class="card-title">Attendance Details</h5>
-                    <div class="table-responsive">
-                        <table class="table align-middle" id="attendanceTable">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="card-title">Attendance Details</h5>
+                <!-- Month Filter Dropdown -->
+                <div>
+                    <select class="form-select form-select-sm" id="monthFilter" style="width:auto;display:inline-block;">
+                        <option value="all">All Months</option>
+                        {% for month in months %}
+                        <option value="{{ month.value }}">{{ month.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table align-middle" id="attendanceTable">
                     <thead>
                         <tr>
                             <th>Date</th>
@@ -236,27 +194,27 @@
                     </thead>
                     <tbody>
                         {% for record in attendance_records %}
-                        <tr class="attendance-row{% if loop.index > 5 %} d-none{% endif %}">
+                        <tr class="attendance-row{% if loop.index > 5 %} d-none{% endif %}" data-month="{{ record.date.strftime('%m') }}">
                             <td>{{ record.date.strftime('%Y-%m-%d') }}</td>
                             <td>
                                 {% if record.date.weekday() in [5, 6] %}
-                -
-            {% elif record.time %}
-                {{ record.time.strftime('%H:%M') }}
-            {% else %}
-                -
-            {% endif %}
+                                    -
+                                {% elif record.time %}
+                                    {{ record.time.strftime('%H:%M') }}
+                                {% else %}
+                                    -
+                                {% endif %}
                             </td>
                             <td>
                                 {% if record.date.weekday() == 5 %}
-                <span class="badge bg-info text-dark">Saturday Holiday</span>
-            {% elif record.date.weekday() == 6 %}
-                <span class="badge bg-info text-dark">Sunday Holiday</span>
-            {% elif record.time %}
-                <span class="badge bg-success">Present</span>
-            {% else %}
-                <span class="badge bg-danger">Absent</span>
-            {% endif %}
+                                    <span class="badge bg-info text-dark">Saturday Holiday</span>
+                                {% elif record.date.weekday() == 6 %}
+                                    <span class="badge bg-info text-dark">Sunday Holiday</span>
+                                {% elif record.time %}
+                                    <span class="badge bg-success">Present</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Absent</span>
+                                {% endif %}
                             </td>
                         </tr>
                         {% else %}
@@ -275,6 +233,7 @@
 </section>
 <script>
     document.addEventListener("DOMContentLoaded", function() {
+        // Show all attendance rows
         const btn = document.getElementById("showAllAttendanceBtn");
         if (btn) {
             btn.addEventListener("click", function() {
@@ -282,6 +241,21 @@
                     row.classList.remove("d-none");
                 });
                 btn.style.display = "none";
+            });
+        }
+
+        // Month filter logic
+        const monthFilter = document.getElementById("monthFilter");
+        if (monthFilter) {
+            monthFilter.addEventListener("change", function() {
+                const selected = this.value;
+                document.querySelectorAll("#attendanceTable .attendance-row").forEach(function(row) {
+                    if (selected === "all" || row.getAttribute("data-month") === selected) {
+                        row.style.display = "";
+                    } else {
+                        row.style.display = "none";
+                    }
+                });
             });
         }
     });

@@ -41,7 +41,6 @@ class Attendance(db.Model):
 
 class Fine(db.Model):
     __tablename__ = 'fine'
-    
     fine_id = db.Column(db.Integer, primary_key=True)
     attendance_id = db.Column(db.Integer, db.ForeignKey('attendance.attendance_id', ondelete="CASCADE"), nullable=False)
     student_id = db.Column(db.Integer, db.ForeignKey('students.student_id', ondelete="CASCADE"), nullable=False)
@@ -50,27 +49,15 @@ class Fine(db.Model):
     amount = db.Column(db.Numeric(10,2), default=0)
     status = db.Column(db.String(10), default='Unpaid')  # 'Unpaid' or 'Paid'
     sms_sent = db.Column(db.Boolean, default=False)  # SMS notification sent
+    payment_id = db.Column(db.Integer, db.ForeignKey("payments.payment_id", ondelete="SET NULL"))
 
-    # Relationships (optional, if you want to access related objects easily)
+    # Relationships
     student = db.relationship('Student', backref=db.backref('fines', lazy=True))
     attendance = db.relationship('Attendance', backref=db.backref('fines', lazy=True))
+    payment = db.relationship('Payment', backref=db.backref('paid_fines', lazy=True))
 
-    def __init__(self, attendance_id, student_id, attendance_date):
-        self.attendance_id = attendance_id
-        self.student_id = student_id
-        self.attendance_date = attendance_date
-
-        # Calculate late_by and fine amount
-        if self.attendance_date.hour >= 9:
-            self.late_by = (self.attendance_date.hour - 9) * 60 + self.attendance_date.minute
-            self.amount = 50  # Default fine amount
-            self.sms_sent = False
-        else:
-            self.late_by = 0
-            self.amount = 0
-            self.sms_sent = True  # No fine, SMS not required
-
-
+    def __repr__(self):
+        return f"<Fine {self.fine_id} - {self.status}>"
 
 
 class Payment(db.Model):
