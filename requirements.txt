@@ -1,6 +1,4 @@
 opencv-python
-face_recognition
-dlib
 flask
 flask_sqlalchemy
 psycopg2-binary
